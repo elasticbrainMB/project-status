@@ -3,13 +3,12 @@
 **What this file is.** Current-facts-only summary — not a design document,
 per the roadmap project's own convention. Read this first.
 
-_Last updated: 2026-09-04 — Notion side built and seeded: workspace,
-integration, page, database, and all 3 rows (caddy, infra-watch,
-project-status) live. Git push resolved via a scoped GitHub PAT — all
-three repos now pushed and tracking origin (caddy alone was 33 commits
-behind). Only the GitHub Actions workflow itself remains before the
-Notion mirror updates automatically. See `PLAN-project-status-v1.md`
-for full detail._
+_Last updated: 2026-09-04 — v1 is live end to end. Notion built and
+seeded; all three repos pushed; `notion-status.yml` deployed to all
+three and proven working (a real push to this repo triggered a run,
+which updated this project's own Notion row — verified both via the
+Actions API, conclusion: success, and visually in Notion). See
+`PLAN-project-status-v1.md` for full detail._
 
 ## 1. What this project is
 
@@ -80,25 +79,26 @@ caddy's working tree still has a large amount of uncommitted work
 untouched here, that's Matt's own in-progress work in a project this
 session doesn't own.
 
-## 5. Open, blocking the rest of the build
+## 5. v1 complete — nothing blocking
 
-- `notion-status.yml` is written and committed locally in all three repos
-  (infra-watch, caddy, project-status) — triggers on push to the default
-  branch, finds the row by title match, updates Last Updated / Latest
-  Update / Source. **Cannot push yet**: GitHub rejects it with "refusing
-  to allow a Personal Access Token to create or update workflow ...
-  without `workflow` scope." The fine-grained PAT Matt created only has
-  Contents: Read and write — pushing a `.github/workflows/*` file needs
-  the separate Workflows permission. Matt needs to add "Workflows: Read
-  and write" to the existing token (or reissue it with that added)
-  before these can be pushed.
-- Once pushed, each repo also needs `NOTION_TOKEN` and
-  `NOTION_DATABASE_ID` (`3d1c7cc2-9a3c-8060-beb0-cb5b5c027fd8`) added as
-  repo secrets — the current token can't set these itself either
-  (Secrets permission, 403 confirmed); simplest is Matt adding both by
-  hand via each repo's Settings -> Secrets and variables -> Actions.
-  `NOTION_TOKEN` is the same value already in
-  `C:\automation\secrets\project-status.env`.
+Matt's PAT ended up with Contents, Workflows, and Secrets (all Read and
+write), scoped to the three v1 repos, 90-day expiration. That let this
+session push `notion-status.yml` to all three and set `NOTION_TOKEN` /
+`NOTION_DATABASE_ID` on all three via the API (secret *values* are never
+readable back through the API regardless of permission — only
+create/update/delete). Confirmed live with a real test push to this repo:
+GitHub Actions run succeeded, and the Project Status row's Latest Update,
+Last Updated, and Source (now "GitHub Hook") all updated correctly.
+
+What's left is optional polish, not blocking:
+- Onboard more projects as they come online (explicitly deferred by
+  Matt — not now).
+- The backlog catch-up items Matt mentioned (already-live projects not
+  yet reflected here) — also explicitly deferred.
+- If Matt later wants stricter "real CI passed" semantics instead of
+  "a push to the default branch succeeded," that would mean building an
+  actual build/validate workflow per repo and switching notion-status.yml
+  to a `workflow_run` trigger — a bigger lift, not done for v1.
 
 ## 6. Seeded rows (2026-09-04)
 
