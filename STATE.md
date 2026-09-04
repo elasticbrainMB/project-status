@@ -4,8 +4,9 @@
 per the roadmap project's own convention. Read this first.
 
 _Last updated: 2026-09-04 — Notion side built: workspace, integration,
-page, and database all live. GitHub Actions workflow and seed script not
-yet written. See `PLAN-project-status-v1.md` for full detail._
+page, and database all live. Git push from this session's device shell
+confirmed not viable (see section 4). GitHub Actions workflow and seed
+script not yet written. See `PLAN-project-status-v1.md` for full detail._
 
 ## 1. What this project is
 
@@ -45,26 +46,36 @@ copy of the truth.
   Active/Paused/Done. Source options: Manual/GitHub Hook. Currently empty
   — no rows seeded yet.
 - Built via the Notion UI (Claude in Chrome), not the API — a direct API
-  call from this session's container was blocked by a safety classifier
-  (bearer token in an outbound curl call). Not re-attempted; the UI path
-  worked fine and is what's reflected above.
+  call from this session's cloud container was blocked by a safety
+  classifier (bearer token in an outbound curl call). Not re-attempted;
+  the UI path worked fine and is what's reflected above.
 
-## 4. Open, blocking the rest of the build
+## 4. Git push — confirmed not possible from this session's device shell
 
-- infra-watch has 4 unpushed commits (its whole v1 build) — see
-  `PLAN-project-status-v1.md`'s open items.
-- caddy's git remote isn't reachable from this session's shell (credential
-  issue) — Matt to confirm normal push access works.
-- infra-watch's claude.ai project name still needed for its roadmap
-  pointer file.
+Checked directly: no `credential.helper` configured (local, global, or
+system), no `gh` CLI, no credential-manager binary on PATH in this
+session's device shell. That shell is an isolated Linux VM this session
+uses to reach the mini PC's mounted folders — it's separate from Matt's
+normal Windows terminal, which is presumably where his existing commits on
+these repos came from and where his real git credentials live. This isn't
+a bug to fix in this session; pushing has to happen from Matt's own
+terminal, or he tells me a different way to authenticate.
+
+Affects three repos:
+- infra-watch: 4 local commits (its whole v1 build), unpushed.
+- project-status: 2 local commits (today's STATE.md/plan work), unpushed.
+- caddy: can't even fetch from this shell, so push state is unknown.
+
+This blocks the GitHub Actions hook entirely — a workflow can't finish
+successfully on a repo GitHub doesn't have current code for.
+
+## 5. Open, blocking the rest of the build
+
+- Git push (section 4) — needs Matt.
+- caddy's current push/fetch status — needs Matt to confirm.
 - Seed script (populate the database from `roadmap\STATE.md` /
   `projects\*.md`) not written yet.
 - GitHub Actions workflow (`.github/workflows/notion-status.yml`) not
-  written yet; needs each hooked repo's `NOTION_TOKEN` and `NOTION_PAGE_ID`
-  secrets, which need the seed step to run first to get per-project page
-  ids.
-
-## 4. Not started
-
-Notion workspace/database, Notion internal integration + token, the GitHub
-Actions workflow itself, and per-project config for what feeds Notion.
+  written yet; needs each hooked repo's `NOTION_TOKEN` and
+  `NOTION_PAGE_ID` secrets, which need the seed step to run first to get
+  per-project page ids.

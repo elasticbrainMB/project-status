@@ -78,15 +78,16 @@ database either way) and `NOTION_PAGE_ID` (that repo's own row).
 
 ## Open items, as of 2026-09-04
 
-- **infra-watch has 4 commits sitting unpushed to GitHub** — its entire v1
-  build (`b336544` through `d82554e`). The hook can't see anything that
-  hasn't been pushed; these need to go up before this is testable there.
-- **caddy: git fetch/push failed from this session's shell** —
-  `could not read Username for 'https://github.com'`. Likely a
-  credential-cache difference in this execution context rather than a
-  real problem, but worth Matt confirming he can push normally from his
-  own terminal before this gets relied on.
-- infra-watch's claude.ai project name — needed for its roadmap pointer
-  file (`claude_project` field currently blank).
+- **Git push isn't possible from this session's device shell — confirmed,
+  not just suspected.** No `credential.helper`, no `gh` CLI, nothing on
+  PATH to authenticate with. That shell is a separate, isolated Linux VM
+  this session uses to reach the mini PC's mounted folders — it was never
+  going to share Matt's normal Windows terminal credentials. Affects:
+  - infra-watch: 4 commits unpushed (its entire v1 build,
+    `b336544` through `d82554e`).
+  - project-status: 2 commits unpushed (today's build work).
+  - caddy: can't even fetch from this shell, so push state is unknown.
+  Matt needs to push from his own terminal (or point Claude at a working
+  auth method) before the hook is testable on any of these.
 - Exact Notion API version header / field names get finalized once the
   database actually exists and Claude can see its real schema.
