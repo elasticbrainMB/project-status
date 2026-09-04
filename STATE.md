@@ -5,10 +5,11 @@ per the roadmap project's own convention. Read this first.
 
 _Last updated: 2026-09-04 — Notion side built and seeded: workspace,
 integration, page, database, and all 3 rows (caddy, infra-watch,
-project-status) live. Git push confirmed possible from this session's
-device shell once credentials exist (network works; only auth was
-missing — see section 4, in progress with Matt). GitHub Actions workflow
-still not written. See `PLAN-project-status-v1.md` for full detail._
+project-status) live. Git push resolved via a scoped GitHub PAT — all
+three repos now pushed and tracking origin (caddy alone was 33 commits
+behind). Only the GitHub Actions workflow itself remains before the
+Notion mirror updates automatically. See `PLAN-project-status-v1.md`
+for full detail._
 
 ## 1. What this project is
 
@@ -52,37 +53,40 @@ copy of the truth.
   classifier (bearer token in an outbound curl call). Not re-attempted;
   the UI path worked fine and is what's reflected above.
 
-## 4. Git push — network works, only auth was missing
+## 4. Git push — resolved (2026-09-04)
 
-Corrected finding: the device shell *does* have outbound network access
-(`curl https://github.com` and `https://api.github.com` both return 200;
-`git ls-remote origin` succeeds against infra-watch). The earlier "no
-network" read was wrong or stale. The actual and only blocker is
-credentials: no `credential.helper` configured (local, global, or
-system), no `gh` CLI, nothing on PATH to authenticate a push.
+Was never a network problem — the device shell has outbound access fine
+(`curl https://github.com` / `api.github.com` both 200, `git ls-remote`
+worked). The actual blocker was auth: no `credential.helper`, no `gh`
+CLI, nothing on PATH.
 
-Fix in progress with Matt (2026-09-04, from the mini PC): he's creating a
-GitHub fine-grained personal access token, scoped to just infra-watch,
-pinball-caddy, and project-status, Contents: Read and write. It'll be
-stored at `C:\automation\secrets\github.env` as `GITHUB_TOKEN=...`,
-matching the existing per-project `.env` pattern in that folder. Once
-present, each repo's local (not global) remote gets rewritten to
-`https://x-access-token:<token>@github.com/...` so push works from this
-shell without touching Matt's own terminal credentials.
+Fix: Matt created a GitHub fine-grained PAT scoped to just infra-watch,
+pinball-caddy, and project-status (Contents: Read and write), stored at
+`C:\automation\secrets\github.env` as `GITHUB_TOKEN=...`. Each repo's
+local (not global) remote was rewritten to
+`https://x-access-token:<token>@github.com/...` and pushed. All three now
+track their remote with nothing ahead:
 
-Affects three repos:
-- infra-watch: 4 local commits (its whole v1 build), unpushed.
-- project-status: 3 local commits (today's build + doc work), unpushed.
-- caddy: fetch also failed earlier under the same missing-auth condition;
-  recheck once the token's in place.
+- infra-watch: 6 commits pushed (`8c9b8a7..700209a`) — its whole v1 build
+  plus two more Matt had added since the original count of 4.
+- caddy: **33 commits pushed** (`5199a66..43a755a`) — turned out to be
+  much bigger than expected; this repo's entire Phase B through Phase E
+  history had never reached GitHub. Fast-forward, no conflicts.
+- project-status: pushed as the repo's first commits (`origin/main` didn't
+  exist yet) — `main` now tracks `origin/main`.
+
+caddy's working tree still has a large amount of uncommitted work
+(modified tracked files, many untracked session/prompt/record files) —
+untouched here, that's Matt's own in-progress work in a project this
+session doesn't own.
 
 ## 5. Open, blocking the rest of the build
 
-- Git push (section 4) — token creation in progress with Matt.
 - GitHub Actions workflow (`.github/workflows/notion-status.yml`) not
   written yet; needs each hooked repo's `NOTION_TOKEN` and
   `NOTION_PAGE_ID` secrets. Page/database ids already exist (section 3)
-  since seeding is done — no longer blocked on that.
+  since seeding is done. This is now the only thing standing between
+  "Notion mirror exists" and "Notion mirror updates itself."
 
 ## 6. Seeded rows (2026-09-04)
 

@@ -78,16 +78,21 @@ database either way) and `NOTION_PAGE_ID` (that repo's own row).
 
 ## Open items, as of 2026-09-04
 
-- **Git push isn't possible from this session's device shell — confirmed,
-  not just suspected.** No `credential.helper`, no `gh` CLI, nothing on
-  PATH to authenticate with. That shell is a separate, isolated Linux VM
-  this session uses to reach the mini PC's mounted folders — it was never
-  going to share Matt's normal Windows terminal credentials. Affects:
-  - infra-watch: 4 commits unpushed (its entire v1 build,
-    `b336544` through `d82554e`).
-  - project-status: 2 commits unpushed (today's build work).
-  - caddy: can't even fetch from this shell, so push state is unknown.
-  Matt needs to push from his own terminal (or point Claude at a working
-  auth method) before the hook is testable on any of these.
+- ~~Git push from this session's device shell~~ — resolved. The blocker
+  was auth only (network was fine all along); Matt created a scoped
+  GitHub PAT, stored at `C:\automation\secrets\github.env`, and each
+  repo's local remote now authenticates with it. infra-watch (6 commits),
+  caddy (33 commits — its entire Phase B–E history had never reached
+  GitHub), and project-status (first push) are all pushed and tracking
+  origin.
+- ~~Notion database not seeded~~ — resolved. All three rows (caddy,
+  infra-watch, project-status) are in, via the same browser-UI path as
+  the schema build. The Status property was also missing a "Paused"
+  option — added and reordered.
 - Exact Notion API version header / field names get finalized once the
-  database actually exists and Claude can see its real schema.
+  GitHub Actions workflow is actually written and calling the API for
+  real.
+- Remaining work: write `.github/workflows/notion-status.yml`, add
+  `NOTION_TOKEN` / `NOTION_PAGE_ID` as GitHub Actions secrets on each
+  hooked repo (page/database ids are known now — see STATE.md section 3),
+  and confirm a live run updates a row.
