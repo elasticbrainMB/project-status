@@ -82,11 +82,23 @@ session doesn't own.
 
 ## 5. Open, blocking the rest of the build
 
-- GitHub Actions workflow (`.github/workflows/notion-status.yml`) not
-  written yet; needs each hooked repo's `NOTION_TOKEN` and
-  `NOTION_PAGE_ID` secrets. Page/database ids already exist (section 3)
-  since seeding is done. This is now the only thing standing between
-  "Notion mirror exists" and "Notion mirror updates itself."
+- `notion-status.yml` is written and committed locally in all three repos
+  (infra-watch, caddy, project-status) — triggers on push to the default
+  branch, finds the row by title match, updates Last Updated / Latest
+  Update / Source. **Cannot push yet**: GitHub rejects it with "refusing
+  to allow a Personal Access Token to create or update workflow ...
+  without `workflow` scope." The fine-grained PAT Matt created only has
+  Contents: Read and write — pushing a `.github/workflows/*` file needs
+  the separate Workflows permission. Matt needs to add "Workflows: Read
+  and write" to the existing token (or reissue it with that added)
+  before these can be pushed.
+- Once pushed, each repo also needs `NOTION_TOKEN` and
+  `NOTION_DATABASE_ID` (`3d1c7cc2-9a3c-8060-beb0-cb5b5c027fd8`) added as
+  repo secrets — the current token can't set these itself either
+  (Secrets permission, 403 confirmed); simplest is Matt adding both by
+  hand via each repo's Settings -> Secrets and variables -> Actions.
+  `NOTION_TOKEN` is the same value already in
+  `C:\automation\secrets\project-status.env`.
 
 ## 6. Seeded rows (2026-09-04)
 
