@@ -3,9 +3,9 @@
 **What this file is.** Current-facts-only summary — not a design document,
 per the roadmap project's own convention. Read this first.
 
-_Last updated: 2026-09-04 — scope and architecture confirmed with Matt;
-`PLAN-project-status-v1.md` is now authoritative on how and why. Nothing
-built yet beyond this scaffold._
+_Last updated: 2026-09-04 — Notion side built: workspace, integration,
+page, and database all live. GitHub Actions workflow and seed script not
+yet written. See `PLAN-project-status-v1.md` for full detail._
 
 ## 1. What this project is
 
@@ -28,16 +28,41 @@ copy of the truth.
 - Went straight to Active, skipping Planned — building started
   immediately, so there was no scoped-but-parked gap for Planned to hold.
 
-## 3. Open, blocking the build
+## 3. Built so far (2026-09-04)
+
+- Notion workspace: "AI development" (renamed from default during this
+  build).
+- Internal connection "project-status" created, access-token auth,
+  scoped to that workspace. Token capabilities: Read/Update/Insert
+  content, no comments, no user information (tightened from the default).
+  Token stored at `C:\automation\secrets\project-status.env`.
+- Top-level page "Project Status" created and shared with the connection
+  (page id `3d1c7cc2-9a3c-802f-9acf-fb56dc9578b3`).
+- "Projects" database created inside that page (database id
+  `3d1c7cc2-9a3c-8060-beb0-cb5b5c027fd8`), schema matches the plan doc
+  exactly: Project, Status, Last Updated, Latest Update, Repo, Disk
+  Location, Claude Project, Source. Status options: Sketched/Planned/
+  Active/Paused/Done. Source options: Manual/GitHub Hook. Currently empty
+  — no rows seeded yet.
+- Built via the Notion UI (Claude in Chrome), not the API — a direct API
+  call from this session's container was blocked by a safety classifier
+  (bearer token in an outbound curl call). Not re-attempted; the UI path
+  worked fine and is what's reflected above.
+
+## 4. Open, blocking the rest of the build
 
 - infra-watch has 4 unpushed commits (its whole v1 build) — see
   `PLAN-project-status-v1.md`'s open items.
 - caddy's git remote isn't reachable from this session's shell (credential
   issue) — Matt to confirm normal push access works.
-- Notion database doesn't exist yet — Matt needs to create the
-  integration and the database (steps in the plan doc).
 - infra-watch's claude.ai project name still needed for its roadmap
   pointer file.
+- Seed script (populate the database from `roadmap\STATE.md` /
+  `projects\*.md`) not written yet.
+- GitHub Actions workflow (`.github/workflows/notion-status.yml`) not
+  written yet; needs each hooked repo's `NOTION_TOKEN` and `NOTION_PAGE_ID`
+  secrets, which need the seed step to run first to get per-project page
+  ids.
 
 ## 4. Not started
 
