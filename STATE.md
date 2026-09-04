@@ -115,3 +115,10 @@ container. Source set to Manual for all three (none are hooked yet):
 Also fixed while seeding: the Status property was missing "Paused" (only
 had Sketched/Planned/Active/Done, 4 of the intended 5 options). Added it
 and reordered to Sketched/Planned/Active/Paused/Done.
+
+## 7. GitHub Actions hook — live (2026-09-04)
+
+`NOTION_TOKEN` and `NOTION_DATABASE_ID` set as repo secrets on all three
+repos (infra-watch, caddy, project-status) via the API, now that the PAT
+has Secrets: Read and write. This commit is the first real test of the
+hook end to end.
