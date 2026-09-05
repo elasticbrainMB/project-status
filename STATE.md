@@ -3,12 +3,11 @@
 **What this file is.** Current-facts-only summary — not a design document,
 per the roadmap project's own convention. Read this first.
 
-_Last updated: 2026-09-04 — v1 is live end to end. Notion built and
-seeded; all three repos pushed; `notion-status.yml` deployed to all
-three and proven working (a real push to this repo triggered a run,
-which updated this project's own Notion row — verified both via the
-Actions API, conclusion: success, and visually in Notion). See
-`PLAN-project-status-v1.md` for full detail._
+_Last updated: 2026-09-05 — v1 (per-project Active status sync) still
+live end to end. Second phase added: a backlog sync that watches
+BACKLOG.md and Planned pointer files in the roadmap repo itself. See
+`PLAN-project-status-v1.md` for the original build, section 8 below for
+the backlog sync._
 
 ## 1. What this project is
 
@@ -122,3 +121,77 @@ and reordered to Sketched/Planned/Active/Paused/Done.
 repos (infra-watch, caddy, project-status) via the API, now that the PAT
 has Secrets: Read and write. This commit is the first real test of the
 hook end to end.
+
+
+## 8. Backlog sync — Sketched and Planned rows (2026-09-05)
+
+Second phase, requested by Matt after v1: mirror `BACKLOG.md` (Sketched
+ideas) and `projects\*.md` pointer files with `status: planned` into the
+same Notion database, so the dashboard shows the whole pipeline, not just
+Active projects. Lives entirely in the roadmap repo, not here, since it
+watches roadmap's own files rather than a single project's build:
+`C:\automation\roadmap\.github\workflows\notion-backlog-sync.yml` +
+`C:\automation\roadmap\scripts\notion_backlog_sync.py`.
+
+**Decided with Matt before building (4 questions, all answered):**
+- A graduating idea's pointer file must reuse its BACKLOG.md heading text
+  exactly as its `name` field, so the sync updates the same Notion row
+  instead of creating a second one on graduation. Documented in
+  `roadmap\CLAUDE.md` and `roadmap\projects\_TEMPLATE.md`.
+- Also watch `projects\*.md` files with `status: planned`, not just
+  BACKLOG.md — so graduation shows up as a Status change on the same row.
+- Added a "Dropped" option to Notion's Status property, for an idea
+  abandoned outright (removed from BACKLOG.md, never graduates).
+- Push-triggered, same shape as the three per-project hooks.
+
+**Edge case found while designing, not covered by the four questions
+above:** some ideas skip the pointer-file stage entirely — "Cycling-day
+rating" and "vpin skill-building" both reached Active/Paused status with
+no `projects\*.md` file, because the pointer-file system only kicks in
+once there's a `disk_location` to point at (n8n-only or no-folder-yet
+projects never get one). A naive "title missing from BACKLOG.md and
+Planned files = Dropped" rule would have mislabeled those as abandoned
+right at the moment they actually succeeded.
+
+**Fix:** before marking anything Dropped, the script also checks whether
+the title still appears anywhere in `STATE.md`'s own text. `STATE.md` is
+supposed to mention every tracked project somewhere per the roadmap's own
+sync discipline, so this is a cheap, effective safety net — confirmed
+against Matt's own current STATE.md draft, which does mention
+"Cycling-day rating" by that exact name. Cost of the safety net: a title
+it protects also won't get its Notion row auto-corrected (e.g. Sketched
+→ Active) — that stays a manual STATE.md-driven fix, same as before this
+sync existed. Never touches a row whose Notion Status is already Active,
+Paused, Done, or Dropped — those belong to the per-project hooks and to
+Matt's own STATE.md edits.
+
+**Reconciliation is a full state check on every run, not an incremental
+diff of the commit** — simpler and more robust than trying to diff two
+versions of BACKLOG.md, and consistent with "disk is the source of
+truth": Notion for these rows is always a full re-derivation of whatever
+BACKLOG.md and the Planned pointer files currently say.
+
+**Built and pushed to the roadmap repo (commit `da42b79`):** the workflow,
+the script, and the two doc updates only — Matt's own pending edits to
+`BACKLOG.md`, `STATE.md`, and the `projects\*.md` files in that repo were
+left exactly as he had them, uncommitted, per the roadmap's own practice
+of leaving that project's changes for his review.
+
+**First live run already happened, unintentionally** — the push above
+touched `projects\_TEMPLATE.md`, which matched the workflow's own path
+filter (`projects/**.md`) and fired it against the *old, still-committed*
+BACKLOG.md and pointer files (Matt's newer versions are local-only until
+he pushes). Result: six Sketched rows reflecting the stale backlog text,
+plus one incorrect duplicate — a lowercase "infra-watch" Planned row,
+because the old committed `projects\infra-watch.md` still says `status:
+planned`. Deleted that duplicate by hand via Notion. The six stale
+Sketched rows were left alone — they're harmless and self-correct the
+next time Matt pushes his real BACKLOG.md/STATE.md/projects changes (the
+Model-version-review and beehiiv rows will correctly flip to Dropped
+since their old titles no longer appear anywhere current; Cycling-day
+rating will correctly stay protected by the STATE.md check instead of
+being dropped).
+
+**Not yet done:** Matt hasn't pushed his pending roadmap changes, so the
+sync hasn't run against real current content yet. That push is the next
+real test.
