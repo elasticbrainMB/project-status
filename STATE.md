@@ -3,11 +3,10 @@
 **What this file is.** Current-facts-only summary — not a design document,
 per the roadmap project's own convention. Read this first.
 
-_Last updated: 2026-09-05 — v1 (per-project Active status sync) still
-live end to end. Second phase added: a backlog sync that watches
-BACKLOG.md and Planned pointer files in the roadmap repo itself. See
-`PLAN-project-status-v1.md` for the original build, section 8 below for
-the backlog sync._
+_Last updated: 2026-09-06 — v1 and Phase 2 (backlog sync) still live
+end to end. Phase 3 added: a Description column, separate from Latest
+Update. See `PLAN-project-status-v1.md` for the original build, section 8
+for the backlog sync, section 9 for the Description column._
 
 ## 1. What this project is
 
@@ -195,3 +194,53 @@ being dropped).
 **Not yet done:** Matt hasn't pushed his pending roadmap changes, so the
 sync hasn't run against real current content yet. That push is the next
 real test.
+
+## 9. Description column added (2026-09-06)
+
+Matt asked for a dedicated Description column, separate from Latest
+Update -- Latest Update had been doing double duty as both a static
+"what is this project" summary and a dated "what just happened" status
+line. Split the two:
+
+- **Description** -- one or two plain-language sentences, seeded exactly
+  once from disk (the pointer file's body text for Planned/Active/Paused/
+  Done rows, the BACKLOG.md entry's text for Sketched rows) and then left
+  alone by every script for good, so Matt can hand-polish wording in
+  Notion without a later disk edit overwriting it.
+- **Latest Update** -- unchanged for Active rows (still the commit
+  subject line from each project's own `notion-status.yml` hook). For
+  Sketched/Planned rows, `notion_backlog_sync.py` (in the roadmap repo)
+  now only changes it on a real status move ("Moved to Planned on
+  September 6, 2026") or first creation ("Added to roadmap on
+  September 6, 2026"), instead of bumping to today on every push that
+  touches any backlog file, even ones nothing happened to.
+
+**Field ownership, made explicit:** `notion-status.yml` (this repo, and
+caddy's, infra-watch's) owns Last Updated / Latest Update / Source for
+Active rows and never touches Description. `notion_backlog_sync.py`
+(roadmap repo) fully owns Sketched/Planned rows, and additionally seeds
+Description-only (never Status/dates/Source) for Active/Paused/Done
+pointer files it finds in `roadmap\projects\`, so an Active project's
+Description can be set just by editing its own roadmap pointer file --
+no changes needed in this repo or in caddy's/infra-watch's.
+
+Schema and view updated directly via the Notion connector (no browser
+automation needed this time -- the connector reaches the Notion API
+directly from this session, unlike the earlier `curl`-with-bearer-token
+path that a safety classifier blocked during the original v1 build).
+All 12 existing rows were also backfilled with a Description directly
+through the connector, so the dashboard reflects the split immediately
+rather than waiting on the next push.
+
+**Not done yet, by design:** `roadmap\projects\infra-watch.md` is still
+committed with stale content (`status: planned`, and `name: "infra-watch"`
+lowercase -- the same casing that caused a duplicate row once before, per
+section 8's edge-case notes). Matt has a newer version of that file
+sitting uncommitted locally, fixing the status but not the casing. The
+roadmap-repo commit for this Description-column change was deliberately
+built and committed *without* pushing, specifically to avoid triggering
+`notion-backlog-sync.yml` against that stale committed file -- doing so
+would recreate the exact duplicate-row bug fixed in section 8. Once Matt
+commits his own infra-watch.md fix (ideally also correcting `name` to
+"Infra-Watch" to match Notion's row exactly), both commits can be pushed
+together safely.
