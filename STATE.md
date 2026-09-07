@@ -232,15 +232,23 @@ All 12 existing rows were also backfilled with a Description directly
 through the connector, so the dashboard reflects the split immediately
 rather than waiting on the next push.
 
-**Not done yet, by design:** `roadmap\projects\infra-watch.md` is still
-committed with stale content (`status: planned`, and `name: "infra-watch"`
-lowercase -- the same casing that caused a duplicate row once before, per
-section 8's edge-case notes). Matt has a newer version of that file
-sitting uncommitted locally, fixing the status but not the casing. The
-roadmap-repo commit for this Description-column change was deliberately
-built and committed *without* pushing, specifically to avoid triggering
-`notion-backlog-sync.yml` against that stale committed file -- doing so
-would recreate the exact duplicate-row bug fixed in section 8. Once Matt
-commits his own infra-watch.md fix (ideally also correcting `name` to
-"Infra-Watch" to match Notion's row exactly), both commits can be pushed
-together safely.
+**Resolved, 2026-09-07:** the roadmap repo now has three commits pushed
+(`8ce9844` this Description-column change, `6eb148e` finishing Matt's
+pending infra-watch.md graduation to Active, `2d2891a` fixing the
+lowercase-name casing bug on *both* `infra-watch.md` and
+`project-status.md` -- a second instance of the same bug was found on
+project-status's own pointer file while closing this out, silently
+harmless only because its Description was already seeded by hand).
+`notion-backlog-sync.yml` ran clean on the push (run `34113735540`,
+succeeded) -- verified directly against Notion afterward: still exactly
+one "Infra-Watch" row and one "Project Status" row, Description and the
+other Active-row fields untouched on both, no duplicates created. The
+roadmap repo is now clean and pushed; nothing left blocking on this
+project's side. (A prompt file recording the exact steps taken is at
+`roadmap\prompts\CODE-PROMPT-infra-watch-fix-and-push-2026-09-07.md`,
+for anyone re-running an equivalent close-out later.)
+
+Two pieces of pre-existing, unrelated clutter are still sitting
+untracked in the roadmap repo -- `Claude outputs\` and `_to_delete\`
+(the latter is explicitly "for Matt to remove" per section 8) -- neither
+was touched; that's Matt's call, not this sync's.
