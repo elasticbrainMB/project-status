@@ -8,6 +8,10 @@ end to end. Phase 3 added: a Description column, separate from Latest
 Update. See `PLAN-project-status-v1.md` for the original build, section 8
 for the backlog sync, section 9 for the Description column._
 
+_Confirmed with Matt, 2026-09-10: v1 and the Notion dashboard sync (backlog
+sync + per-project hooks) are live and working end to end. No open or
+roadmap items for this project at this time._
+
 ## 1. What this project is
 
 Automated Notion mirror of project status across the roadmap's Active
